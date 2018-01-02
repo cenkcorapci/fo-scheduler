@@ -53,5 +53,5 @@ scheduler(_, _,  DriversLeft, _, DaysLeft, X) :-
   nl.
 
 % Call scheduler %
-schedule(Buses, Drivers, _) :-
+schedule(Drivers, Buses , _) :-
   scheduler([], Buses, [], Drivers, [mon, tue, wed, thu, fri, sat, sun], []).
