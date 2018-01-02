@@ -19,7 +19,8 @@ schedule([b1,b2,b3],[d1,d2,d3,d4,d5],[]).
 ```
 Example output;
 ```
-[debug]  ?- schedule([b1,b2,b3],[d1,d2,d3,d4,d5],[]).
-[mon,d1,b1,d2,b2,d3,b3,tue,wed,thu,d1,b1,d2,b2,d3,b3,fri,sat,sun,d1,b1,d2,b2,d3,b3]
-true .
+schedule([d1,d2,d3,d4,d5],[b1,b2,b3],[]).
+[mon,b1,d1,b2,d2,b3,d3,tue,b1,d1,b2,d2,b3,d3,wed,b1,d4,b2,d5,thu,b1,d1,b2,d2,b3,d3,fri,b1,d1,b2,d2,b3,d3,sat,b1,d4,b2,d5,sun,b1,d1,b2,d2,b3,d3]
+true
+
 ```

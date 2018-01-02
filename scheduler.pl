@@ -6,23 +6,49 @@ is_day(fri).
 is_day(sat).
 is_day(sun).
 
+% Utilities %
+removehead([_|Tail], Tail).
+first([F|_], F).
 
-%Check if assigned in last n days%
-scheduled_in_last_n_days(Driver, [Item|_], N) :-
-  N >= 0,
-  Item = Driver.
+% Check if we can select the driver %
+working_for_n_consecutive_days(_, _, NLeft, N, Working) :-
+  NLeft = 0,
+  Working = N.
 
-scheduled_in_last_n_days(Driver, [Item|ReversedSchedule], N) :-
-  N >= 0,
+working_for_n_consecutive_days(Driver, [Item|ReversedSchedule], NLeft, N, Working) :-
+  NLeft > 0,
+  Item = Driver,
+  W is Working + 1,
+  working_for_n_consecutive_days(Driver, ReversedSchedule, NLeft, N, W).
+
+working_for_n_consecutive_days(Driver, [Item|ReversedSchedule], NLeft, N, Working) :-
+  NLeft > 0,
   is_day(Item),
-  Y is N - 1,
-  scheduled_in_last_n_days(Driver, ReversedSchedule, Y).
+  L is NLeft - 1,
+  working_for_n_consecutive_days(Driver, ReversedSchedule, L, N, Working).
 
-scheduled_in_last_n_days(Driver, [Item|ReversedSchedule], N) :-
-  N >= 0,
+working_for_n_consecutive_days(Driver, [Item|ReversedSchedule], NLeft, N, Working) :-
+  NLeft > 0,
   Item \= Driver,
   \+ is_day(Item),
-  scheduled_in_last_n_days(Driver, ReversedSchedule, N).
+  working_for_n_consecutive_days(Driver, ReversedSchedule, NLeft, N, Working).
+
+driver_is_not_available(Driver, Schedule) :-
+  N is 2,
+  reverse(Schedule, R),
+  first(R, D),
+  is_day(D),
+  removehead(R, T),
+  working_for_n_consecutive_days(Driver, T, N, N, 0).
+
+
+driver_is_not_available(Driver, Schedule) :-
+  N is 2,
+  reverse(Schedule, R),
+  first(R, D),
+  \+ is_day(D),
+  working_for_n_consecutive_days(Driver, R, N, N, 0).
+
 
 % Schedule %
 scheduler(Buses, AllBuses, Drivers, AllDrivers, [Day|Days], X) :-
@@ -34,9 +60,19 @@ scheduler(Buses, AllBuses, Drivers, AllDrivers, [Day|Days], X) :-
   scheduler(AllBuses, AllBuses, AllDrivers, AllDrivers, Days, Acc).
 
 % assign driver if it's feasible %
-scheduler([Bus|Buses],  AllBuses, [Driver|DriversLeft],Drivers, Days, X) :-
-  reverse(X, R),
-  \+ scheduled_in_last_n_days(Driver, R, 2),
+scheduler([Bus|Buses],  AllBuses, [Driver|DriversLeft], Drivers, Days, X) :-
+  length(Days, DL),
+  DayCount is 7 - DL,
+  DayCount >= 3,
+  \+ driver_is_not_available(Driver, X),
+  append(X, [Bus, Driver], Y),
+  scheduler(Buses, AllBuses, DriversLeft, Drivers, Days, Y).
+
+% assign driver if it's feasible %
+scheduler([Bus|Buses],  AllBuses, [Driver|DriversLeft], Drivers, Days, X) :-
+  length(Days, DL),
+  DayCount is 7 - DL,
+  DayCount < 3,
   append(X, [Bus, Driver], Y),
   scheduler(Buses, AllBuses, DriversLeft, Drivers, Days, Y).
 
